@@ -1,0 +1,31 @@
+# version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mac-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mac-link-service
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    networks:
+      - mac-net
+
+networks:
+  mac-net:
+volumes:
+  mongo_data:
