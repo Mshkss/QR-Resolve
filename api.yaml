@@ -1,0 +1,256 @@
+openapi: 3.1.0
+info:
+  title: QR Resolve API
+  version: 1.0.0
+  description: >
+    Сервис принимает путь с буквенным номер производителя и идентификатором устройства,
+    извлекает данные по MAC и возвращает связанную ссылку на медиасервис.
+servers:
+  - url: https://qrpt.esls.ru
+paths:
+  /ping:
+    get:
+      responses:
+        '200':
+          description: pet response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pong'
+
+  /{category}/{device_id}:
+    get:
+      operationId: resolveDevice
+      tags: [QR]
+      summary: Получить ссылку по типу устройства и MAC-адресу
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "m"
+          description: Производитель ценника. a - SID, b - MINEW, и т.д.
+        - name: device_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "a_12345678"
+          description: Префикс + MAC-адрес устройства
+      responses:
+        '200':
+          description: Ссылка найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResolvedLink'
+        '400':
+          description: Неверный формат идентификатора
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Ссылка по заданному устройству не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: ["Auth"]
+      summary: Авторизация пользователя
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Успешная авторизация
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Неверные учетные данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api:
+    post:
+      summary: Добавить новую пару MAC + redirect_url
+      operationId: addApiEntry
+      tags: [API]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiEntry'
+      responses:
+        '200':
+          description: Успешно добавлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiEntry'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/{mac}:
+    put:
+      summary: Изменить ссылку по MAC
+      operationId: updateApiEntry
+      tags: [API]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiEntry'
+      responses:
+        '200':
+          description: Обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiEntry'
+        '400':
+          description: Некорректный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Неавторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Удалить запись по MAC
+      operationId: deleteApiEntry
+      tags: [API]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: mac
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Удалено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiEntry'
+        '401':
+          description: Неавторизован
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+
+components:
+  schemas:
+    Pong:
+      type: object
+      required:
+        - ping
+      properties:
+        ping:
+          type: string
+          example: pong
+    ResolvedLink:
+      type: object
+      properties:
+        url:
+          type: string
+          example: "https://youtube.com/..."
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "user@example.com"
+        password:
+          type: string
+          format: password
+          example: "secret123"
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT-токен
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Invalid credentials"
+    ApiEntry:
+      type: object
+      required:
+        - mac
+        - redirect_url
+      properties:
+        mac:
+          type: string
+          example: "a_12345678"
+        redirect_url:
+          type: string
+          example: "https://youtube.com/..."
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,31 @@
+# version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6
+    container_name: mongo_v2
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mac-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: QR-ResolveV2
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+    networks:
+      - mac-net
+
+networks:
+  mac-net:
+volumes:
+  mongo_data:
