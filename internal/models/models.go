@@ -10,3 +10,8 @@ type LoginRequest struct {
 	Password string `json:"password" bson:"password"`
 	Username string `json:"username" bson:"username"`
 }
+
+type LoginResponse struct {
+	// Token JWT-токен
+	Token *string `json:"token,omitempty" bson:"token,omitempty"`
+}

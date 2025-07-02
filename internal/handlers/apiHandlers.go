@@ -33,23 +33,38 @@ func (s *Server) ResolveDevice(ctx echo.Context, category string, deviceId strin
 
 }
 
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//TODO:
-
-// POST /api
+// POST /api/new
 func (s *Server) AddApiEntry(ctx echo.Context) error {
-	// TODO: реализовать добавление записи
-	return ctx.JSON(http.StatusNotImplemented, map[string]string{"error": "not implemented"})
+	user := ctx.Get("username")
+	log.Printf("JWT user: %v", user)
+	username, ok := user.(string)
+	if !ok || username == "" {
+		return ctx.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid JWT claims"})
+	}
+
+	log.Printf("JWT username: %s", username)
+
+	// 2. Парсим тело запроса
+	var req models.ApiEntry
+	if err := ctx.Bind(&req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	// 3. Вставляем запись в MongoDB
+	_, err := s.ApiCollection.InsertOne(ctx.Request().Context(), req)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to insert entry"})
+	}
+
+	return ctx.JSON(http.StatusCreated, map[string]string{"result": "entry added"})
 }
 
+// 4
+// 3
+// 1
+// 2
+// 1
+// TODO:
 // DELETE /api/:mac"
 func (s *Server) DeleteApiEntry(ctx echo.Context, mac string) error {
 	// TODO: реализовать удаление записи

@@ -60,7 +60,7 @@ type LoginUserJSONRequestBody = LoginRequest
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 	// Добавить новую пару MAC + redirect_url
-	// (POST /api)
+	// (POST /api/new)
 	AddApiEntry(ctx echo.Context) error
 	// Удалить запись по MAC
 	// (DELETE /api/{mac})
@@ -201,7 +201,7 @@ func RegisterHandlersWithBaseURL(router EchoRouter, si ServerInterface, baseURL 
 		Handler: si,
 	}
 
-	router.POST(baseURL+"/api", wrapper.AddApiEntry)
+	router.POST(baseURL+"/api/new", wrapper.AddApiEntry)
 	router.DELETE(baseURL+"/api/:mac", wrapper.DeleteApiEntry)
 	router.PUT(baseURL+"/api/:mac", wrapper.UpdateApiEntry)
 	router.POST(baseURL+"/auth/login", wrapper.LoginUser)

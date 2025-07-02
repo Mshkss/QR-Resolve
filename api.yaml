@@ -83,7 +83,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /api:
+  /api/new:
     post:
       summary: Добавить новую пару MAC + redirect_url
       operationId: addApiEntry
