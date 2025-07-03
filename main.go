@@ -8,7 +8,6 @@ import (
 	"QR_Resolve/internal/handlers"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -24,7 +23,7 @@ func main() {
 	server := handlers.NewServer(apiCollection, usersCollection)
 
 	e := echo.New()
-	e.Pre(echo.MiddlewareFunc(middleware.RemoveTrailingSlash()))
+	//e.Pre(echo.MiddlewareFunc(middleware.RemoveTrailingSlash()))
 
 	apiGroup := e.Group("/api", handlers.JWTMiddleware([]byte("your-secret-key")))
 	api.RegisterHandlersWithBaseURL(apiGroup, &server, "/api")
