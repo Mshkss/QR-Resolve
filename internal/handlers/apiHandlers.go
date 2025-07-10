@@ -26,33 +26,20 @@ func (s *Server) ResolveDevice(ctx echo.Context, category string, deviceId strin
 		log.Printf("MongoDB FindOne error: %v", err)
 		return ctx.JSON(http.StatusNotFound, map[string]string{"error": "not found"})
 	}
-
-	log.Printf("MongoDB found entry: %+v", entry)
-	log.Printf("MongoDB found entry2: %+v", entry.RedirectUrl)
-
+	log.Printf("MongoDB entry: %+v", entry)
+	log.Printf("MongoDB redirectUrl: %+v", entry.RedirectUrl)
+	
 	return ctx.JSON(http.StatusOK, api.ResolvedLink{Url: &entry.RedirectUrl})
-
 }
 
 // POST /api/new
 func (s *Server) AddApiEntry(ctx echo.Context) error {
-	// todo: НЕ РАБОТАЕТ JWT >>>
-	// user := ctx.Get("username")
-	// log.Printf("JWT user: %v", user)
-	// username, ok := user.(string)
-	// if !ok || username == "" {
-	// 	return ctx.JSON(http.StatusUnauthorized, map[string]string{"error": "invalid JWT claims"})
-	// }
-
-	// log.Printf("JWT username: %s", username)
-	// <<<
-
 	var req models.ApiEntry
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 	}
 
-	// 2. Проверяем, существует ли запись с таким же MAC-адресом
+	// проверка существует ли запись с таким же MAC-адресом
 	var existingDevice models.ApiEntry
 	err := s.ApiCollection.FindOne(ctx.Request().Context(), bson.M{
 		"mac":          req.Mac,
@@ -71,9 +58,8 @@ func (s *Server) AddApiEntry(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, map[string]string{"result": "Mac added"})
 }
 
-// DELETE /api/:mac"
+// DELETE /api/:mac
 func (s *Server) DeleteApiEntry(ctx echo.Context, mac string) error {
-	// TODO: проверка JWT
 	var req models.ApiEntry
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
@@ -87,12 +73,11 @@ func (s *Server) DeleteApiEntry(ctx echo.Context, mac string) error {
 
 // PUT /api/:mac
 func (s *Server) UpdateApiEntry(ctx echo.Context, mac string) error {
-	// TODO: проверка JWT
 	var req models.ApiEntry
 	if err := ctx.Bind(&req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
-		}
-	
+	}
+
 	_, err := s.ApiCollection.UpdateOne(
 		ctx.Request().Context(),
 		bson.M{"mac": mac},

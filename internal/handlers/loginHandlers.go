@@ -17,6 +17,7 @@ func (s *Server) LoginUser(ctx echo.Context) error {
 	if err := ctx.Bind(&req); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid request body")
 	}
+
 	log.Printf("api.LoginRequest=%s", &req)
 
 	// Поиск пользователя по username
@@ -28,7 +29,7 @@ func (s *Server) LoginUser(ctx echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "User not found")
 	}
-	
+
 	// Проверка пароля hash
 	// if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 	// 	return echo.NewHTTPError(http.StatusUnauthorized, "Invalid password")
@@ -44,12 +45,13 @@ func (s *Server) LoginUser(ctx echo.Context) error {
 		"username": user.Username,
 		"exp":      time.Now().Add(24 * time.Hour).Unix(),
 	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	tokenString, err := token.SignedString(secret)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Could not generate token")
 	}
-
 	return ctx.JSON(http.StatusOK, api.LoginResponse{Token: &tokenString})
 }
 

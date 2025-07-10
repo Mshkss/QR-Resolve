@@ -12,6 +12,5 @@ func (Server) GetPing(ctx echo.Context) error {
 	resp := api.Pong{
 		Ping: "pong",
 	}
-
 	return ctx.JSON(http.StatusOK, resp)
 }

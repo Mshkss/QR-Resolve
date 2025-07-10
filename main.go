@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	client, err := db.Connect() // используйте свой метод подключения
+	client, err := db.Connect()
 	if err != nil {
 		log.Fatal("Mongo connection error:", err)
 	}
@@ -23,12 +23,16 @@ func main() {
 	server := handlers.NewServer(apiCollection, usersCollection)
 
 	e := echo.New()
-	//e.Pre(echo.MiddlewareFunc(middleware.RemoveTrailingSlash()))
 
-	apiGroup := e.Group("/api", handlers.JWTMiddleware([]byte("your-secret-key")))
-	api.RegisterHandlersWithBaseURL(apiGroup, &server, "/api")
-
+	e.Use(handlers.ConditionalJWTMiddleware([]byte("your-secret-key")))
 	api.RegisterHandlersWithBaseURL(e, &server, "")
+
+	// TODO: весь код ниже переписать под использование oapi codegen net/http middleware >>
+	//v2:
+	// apiGroup := e.Group("/api", handlers.JWTMiddleware([]byte("your-secret-key")))
+	// api.RegisterHandlersWithBaseURL(apiGroup, &server, "/api")
+	// api.RegisterHandlersWithBaseURL(e, &server, "/resolve")
+	// <<
 
 	//v1:
 	//api.RegisterHandlers(e, &server)

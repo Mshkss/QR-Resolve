@@ -12,6 +12,5 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	// Token JWT-токен
 	Token *string `json:"token,omitempty" bson:"token,omitempty"`
 }
