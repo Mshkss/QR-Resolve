@@ -27,7 +27,8 @@ func main() {
 	e.Use(handlers.ConditionalJWTMiddleware([]byte("your-secret-key")))
 	api.RegisterHandlersWithBaseURL(e, &server, "")
 
-	// TODO: весь код ниже переписать под использование oapi codegen net/http middleware >>
+	// TODO: весь код ниже переписать под использование oapi codegen net/http middleware
+	// >>
 	//v2:
 	// apiGroup := e.Group("/api", handlers.JWTMiddleware([]byte("your-secret-key")))
 	// api.RegisterHandlersWithBaseURL(apiGroup, &server, "/api")

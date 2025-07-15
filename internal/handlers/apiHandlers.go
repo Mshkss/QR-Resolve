@@ -28,7 +28,7 @@ func (s *Server) ResolveDevice(ctx echo.Context, category string, deviceId strin
 	}
 	log.Printf("MongoDB entry: %+v", entry)
 	log.Printf("MongoDB redirectUrl: %+v", entry.RedirectUrl)
-	
+
 	return ctx.JSON(http.StatusOK, api.ResolvedLink{Url: &entry.RedirectUrl})
 }
 
